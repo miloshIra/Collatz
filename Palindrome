@@ -1,0 +1,23 @@
+#def palindrome(s):
+
+ #   lp = 0
+ #   rp = len(s) - 1
+
+ #   while rp >= lp:
+ #       if not s[lp] == s[rp]:
+ #           return False
+ #       lp += 1
+ #       rp -= 1
+ #  return True
+
+#print(palindrome('golemkurmaleshevski'))
+
+def asd(str1):
+
+    rstr1 = ''
+    index = len(str1)
+    
+    rstr1 += str1[ index - 1 ]
+    
+
+print(asd('asd'))
