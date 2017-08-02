@@ -1,4 +1,4 @@
-#def palindrome(s):
+ #def palindrome(s):
 
  #   lp = 0
  #   rp = len(s) - 1
@@ -16,8 +16,8 @@ def asd(str1):
 
     rstr1 = ''
     index = len(str1)
-    
-    rstr1 += str1[ index - 1 ]
+    rstr1 = str1[ index - 3 ]
+    return rstr1
     
 
-print(asd('asd'))
+print(asd('biloshto'))
