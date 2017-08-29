@@ -1,4 +1,4 @@
-n = int(input("Enter a numer : "))
+n = int(input("Enter a number : "))
 
 def test_prime(n):
     for x in range(2,n):
