@@ -1,0 +1,18 @@
+import re, pyperclip
+
+
+webRegexre.compile(r"((https?):((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.MULTILINE|re.UNICODE)
+
+text = str(pyperclip.paste())
+matches = []
+
+for groups in webRegex.findall(text):
+    matches.append(groups[0])
+
+if len(matches) > 0:
+    pyperclip.paste()
+    print('Copied to clipboard:')
+    print('\n', matches)
+else:
+    print('Nothing found')
+                
