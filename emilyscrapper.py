@@ -1,6 +1,6 @@
 import requests, os, bs4
 
-url = 'https://myfappening.org/emily-ratajkowski-nude/emily-ratajowski-naked-the-fappening-141/'   # starting URL
+url = 'https://'   # starting URL
 os.makedirs('Emily Heaven', exist_ok=True)                       # stores in Emily heaven
 
 while not url.endswith('#'):
