@@ -5,7 +5,7 @@
 
 ##  String (sequence of characters)
 
-##  Tuple (immulablel stores multiple members)
+##  Tuple (immulable stores multiple members)
 
 ##  List ( mutable; stoes multiple members)
 
