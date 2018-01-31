@@ -1,26 +1,30 @@
-import urllib.request
+import urllib.request, urllib
 from bs4 import BeautifulSoup
 import os
 
-qpage='https://xhamster.com/photos/gallery/emily-ratajkowski-mega-collection-1002080'
-page=urllib.request.urlopen(qpage)
+qpage='https://xhamster.com/photos/gallery/emily-ratajkowski-mega-collection-1002080/'
+os.makedirs('Pictures', exist_ok=True)
+
+for x in range(1,7):
+    cur_page=qpage + str(x)
+    page=urllib.request.urlopen(cur_page)
+    soup=BeautifulSoup(page, "html.parser")
+    image=soup.find_all('div', attrs={'class':'image-thumb'})
+    print(image)
+
+    for item in image:
+        photo=item.get('data-lazy')
+        print(photo)
+        image_name = photo.split("/")[-1]
+        urllib.request.urlretrieve(photo, "./Pictures/" + image_name)
+
+#python download image from urll
 
 
-soup=BeautifulSoup(page, "html.parser")
-# print(soup)
-image=soup.find_all('a', attrs={'class':'photo-container photo-thumb'})
-
-
-
-for item in image:
-    item(str)
-    photo=item.get('href')
-    print(photo)
-
-    imageFile = open(os.path.join('Pics', os.path.basename(photo)), 'wb')
-    for chunk in photo.iter_content():
-        imageFile.write(chunk)
-    imageFile.close()
+    # imageFile = open(os.path.join('Pics', os.path.basename(photo)), 'wb')
+    # for chunk in photo.iter_content():
+    #     imageFile.write(chunk)
+    # imageFile.close()
 
 # imageFile = open(os.path.join('Pics', os.path.basename(photo)), 'wb')
 # imageFile.write(photo)
