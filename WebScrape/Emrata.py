@@ -5,18 +5,29 @@ import os
 qpage='https://xhamster.com/photos/gallery/emily-ratajkowski-mega-collection-1002080/'
 os.makedirs('Pictures', exist_ok=True)
 
+l=[]
+
 for x in range(1,7):
     cur_page=qpage + str(x)
     page=urllib.request.urlopen(cur_page)
     soup=BeautifulSoup(page, "html.parser")
     image=soup.find_all('div', attrs={'class':'image-thumb'})
-    print(image)
+    # print(image)
 
     for item in image:
         photo=item.get('data-lazy')
-        print(photo)
-        image_name = photo.split("/")[-1]
-        urllib.request.urlretrieve(photo, "./Pictures/" + image_name)
+        l.append(photo)
+        # print(l)
+        for item in l:
+            page=urllib.request.urlopen(item)
+            print(page)
+            soup=BeautifulSoup(page, 'html.parser')
+            image=soup.find_all('div', attrs={'class':'fotorama__stage__frame fotorama__active fotorama__loaded fotorama__loaded--img'})
+            for item in image:
+                pic=item.get('img src')
+                print(pic)
+                image_name = photo.split("/")[-1]
+                urllib.request.urlretrieve(photo, "./Pictures/" + image_name)
 
 #python download image from urll
 
