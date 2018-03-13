@@ -14,12 +14,19 @@ price = soup.find_all('p', attrs={'class':'price'})
 for title in title:
     name=title.text.strip()
     list1.append(name)
+    print(list1)
 
 for price in price:
     string_price=(price.text.strip())
-    price_whole_number = string_price[0:2]
-    price_decimal = string_price[3:7]
-    price_whole=(price_whole_number + "." + price_decimal)
+    print(string_price)
+
+    if string_price[1] != ",":
+        price_whole_number = string_price[0:2]
+        price_decimal = string_price[3:5]
+    else:
+        price_whole_number = string_price[0:1]
+        price_decimal = string_price[3:5]
+    price_whole = float(price_whole_number + "." + price_decimal)
     list2.append(price_whole)
 
 
@@ -30,7 +37,6 @@ for i in k:
             writer = csv.writer(csv_file)
             writer.writerow([k])
 
-print(k[2])
 
 
 # https://medium.freecodecamp.org/how-to-scrape-websites-with-python-and-beautifulsoup-5946935d93fe
