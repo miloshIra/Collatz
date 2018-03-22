@@ -1,29 +1,40 @@
-import urllib.request
+import requests
 from bs4 import BeautifulSoup
 import csv
-from datetime import datetime
 
-quote_page = ['https://www.bloomberg.com/quote/SPX:IND','http://www.bloomberg.com/quote/CCMP:IND']
 
-data=[]
+request = requests.get('https://www.bookdepository.com/search?searchTerm=learning+python&search=Find+book')
+content = request.content
+list1 = []
+list2 = []
+soup = BeautifulSoup(content, 'html.parser')
+title = soup.find_all('h3', attrs={'class':'title'})
+price = soup.find_all('p', attrs={'class':'price'})
 
-for pg in quote_page:
-    page=urllib.request.urlopen(pg)
-    soup=BeautifulSoup(page, 'html.parser')
-    name_box = soup.find('h1', attrs={'class':'name'})
-    name=name_box.text.strip() # strip is used to remove starting and trailing
-    print(name)
+for title in title:
+    name=title.text.strip()
+    list1.append(name)
 
-    price_box = soup.find('div', attrs={'class':'price'})
-    price=price_box.text
-    print(price)
-    data.append((name,price))
+for price in price:
+    string_price=(price.text.strip())
 
-# open a csv file with append, so old data will be erased
-with open ('index.csv', 'a') as csv_file:
-    writer = csv.writer(csv_file)
-    for name, price in data:
-        writer.writerow([name, price, datetime.now()])
+    if string_price[1] != ",":
+        price_whole_number = string_price[0:2]
+        price_decimal = string_price[3:5]
+    else:
+        price_whole_number = string_price[0:1]
+        price_decimal = string_price[3:5]
+    price_whole = float(price_whole_number + "." + price_decimal)
+    list2.append(price_whole)
+
+
+k = list(zip(list1,list2))
+
+for i in k:
+        with open ('books.csv', 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow([k])
+
 
 
 # https://medium.freecodecamp.org/how-to-scrape-websites-with-python-and-beautifulsoup-5946935d93fe
