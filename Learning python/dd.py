@@ -1,0 +1,21 @@
+class GetSet(object):
+
+    def __init__(self, value):
+        self.attrval = value
+
+    @property
+    def var(self):
+        print('getting the "var" attribute')
+        return self.attrval
+
+    @var.deleter
+    def var(self):
+        print('deleting the "var" attribute')
+        self.attrval = None
+
+me = GetSet(5)
+
+me.attrvar = 1000
+print(me.var)
+del(me.var)
+print(me.var)
