@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 
 window = tk.Tk()
 window.title('Python GUI')
@@ -34,14 +35,38 @@ check1.grid(column=0, row=4, sticky=tk.W)
 chVarUn = tk.IntVar()
 check2 = tk.Checkbutton(window, text="UnChecked", variable=chVarUn)
 check2.deselect()
-check2.grid(column=1, row=4, sticky=tk.W)
+check2.grid(column=1, row=4, sticky=tk.W) #sticky = tk.W means stuck to the west (left), it is a positional setting
 
 chVarEn = tk.IntVar()
 check3=tk.Checkbutton(window, text="Enabled", variable=chVarEn)
 check3.select()
 check3.grid(column=2, row=4, sticky=tk.W)
 
-nameEntered.focus()
+colors = ["Blue", "Gold","Red"]
 
+def radCall():
+    radSel = radVar.get()
+    if    radSel == 0: window.configure(background=colors[0])
+    elif  radSel == 1: window.configure(background=colors[1])
+    elif  radSel == 2: window.configure(background=colors[2])
+
+#Radio buttons example
+
+radVar = tk.IntVar()
+radVar.set(99)
+
+for col in range(3):
+    curRad = 'rad' + str(col)
+    curRad = tk.Radiobutton(window, text=colors[col], variable=radVar, value=col, command=radCall)
+    curRad.grid(column=col, row=6, sticky=tk.W)
+
+#scrolled text control widget ..
+
+scrolW = 30
+ScrolH =  3
+src = scrolledtext.ScrolledText(window, width =scrolW, height=ScrolH, wrap=tk.WORD)
+src.grid(column=0, columnspan=3)
+
+
+nameEntered.focus()
 window.mainloop()
-# print(type(window))
