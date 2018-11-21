@@ -2,10 +2,53 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 from tkinter import Menu
+from tkinter import messagebox as mBox
+from tkinter import Spinbox
+
+class ToolTip(object):
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        "Display text in tooltip window"
+        self.text = text
+        if self.tipwindow or not self.text:
+            return
+        x,y, _cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 27
+        y = y + cy + self.widget.winfo_rooty() + 27
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x,y))
+
+        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
+                        background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+                        font=("tahoma", "9", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+def createToolTip( widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind("<Enter>", enter)
+    widget.bind("<Leave>", leave)
+
 
 window = tk.Tk()
 window.title('Radica i farmerkite so visok struk')
 
+# Tab control introduction ----------------------------
 tabControl = ttk.Notebook(window)
 
 tab1 = ttk.Frame(tabControl)
@@ -13,7 +56,13 @@ tabControl.add(tab1, text='Tab 1')
 
 tab2 = ttk.Frame(tabControl)
 tabControl.add(tab2, text='Tab 2')
+
+tab3 = ttk.Frame(tabControl)
+tabControl.add(tab3, text='Tab 3')
+
 tabControl.pack(expand=1, fill='both')
+
+# Tab control introduction ----------------------------
 
 monty = ttk.LabelFrame(tab1, text = "Monty Py")
 monty.grid(column=0, row=0)
@@ -39,6 +88,26 @@ numberChosen['values'] = (1, 2, 3, 4, 42, 100)
 numberChosen.grid(column=1, row=1)
 numberChosen.current(0)
 
+# Adding a spinbox widget
+def _spin():
+    value = spin.get()
+    print(value)
+    scr.insert(tk.INSERT, value + '\n')
+
+
+spin = Spinbox(monty, values=[1,2,3,4,12,42], width=5, bd=8, command=_spin)
+spin.grid(column=0, row=2)
+
+createToolTip(spin, "This is a Spin control")
+
+scrolW = 30
+scrolH = 3
+scr = scrolledtext.ScrolledText(monty, width=scrolW, height=scrolH, wrap=tk.WORD)
+scr.grid(column=0, sticky='WE', columnspan=3)
+#scr.grid(column=0, columnspan=3)
+
+createToolTip(scr, "Insert text here")
+
 monty2 = ttk.LabelFrame(tab2, text="The snake")
 monty2.grid(column=0, row=0, padx=8, pady=4)
 
@@ -57,11 +126,7 @@ check3=tk.Checkbutton(monty2, text="Enabled", variable=chVarEn)
 check3.select()
 check3.grid(column=2, row=4, sticky=tk.W)
 
-scrolW = 30
-scrolH = 3
-scr = scrolledtext.ScrolledText(monty, width=scrolW, height=scrolH, wrap=tk.WORD)
-scr.grid(column=0, sticky='WE', columnspan=3)
-#scr.grid(column=0, columnspan=3)
+
 
 colors = ["Blue", "Gold","Red"]
 
@@ -102,6 +167,12 @@ def _quit():
     window.destroy()
     exit()
 
+tab3 = tk.Frame(tab3, bg='blue')
+tab3.pack()
+for orangeColor in range(2):
+    canvas = tk.Canvas(tab3, width=150, height=80, highlightthickness=0, bg='orange')
+    canvas.grid(row=orangeColor, column=orangeColor)
+
 #Creating Menu bar
 
 menuBar = Menu(window)
@@ -115,11 +186,19 @@ fileMenu.add_separator()
 fileMenu.add_command(label="Exit", command=_quit)
 menuBar.add_cascade(label="File", menu=fileMenu)
 
+def _msgBox():
+    # mBox.showinfo('Python Message Info Box', 'A Python GUI created using tkinter: \n             The year is 2016')
+    # mBox.showwarning('Python message warning box', 'There might be a bug in this code, happy hunting :).')
+    mBox.showerror('Python Message Error Box', 'A Python GUI created using tkinter: \n                   Error')
+    answer = mBox.askyesno('Pyton Message Dual Choice Box', 'Are you really wish to o this ?')
+    print(answer)
+
 helpMenu = Menu(menuBar, tearoff=0)
-helpMenu.add_command(label="About")
+helpMenu.add_command(label="About", command=_msgBox)
 menuBar.add_cascade(label="Help", menu=helpMenu)
 
 # Place cursor into name Entry
+window.iconbitmap(r'C:\Users\milos.aritonski\Desktop\vitek.ico')
 
 nameEntered.focus()
 monty.mainloop()
