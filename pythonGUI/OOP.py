@@ -197,8 +197,23 @@ class OOP():
 
         # Add some space around each label
         for child in labelsFrame.winfo_children():
-            child.grid_configure(padx=8)
+            child.grid_configure(padx=6, pady=6)
 
+        def copyFile():
+            import shutil
+            src = self.fileEntry.get()
+            file = src.split('/')[-1]
+            dst = self.netwEntry.get() + '\\' + file
+            try:
+                shutil.copy(src, dst)
+                mBox.showinfo('Copy File to Network', 'Succes: File copied.')
+            except FileNotFoundError as err:
+                mBox.showerror('Copy File to Network', '*** Failed to copy file! *** \n\n\')
+            except Exception as ex:
+                mBox.showerror('Copy file to network', '*** Failed *** \n\n')
+
+        cb.ttk.Button(mngFilesFrame, text= 'Copy file to:', command = copyFile)
+        cb.grid(column=0, row=1, sticky=tk.E)
 
         # Creating a Menu Bar
         menuBar = Menu(tab1)
