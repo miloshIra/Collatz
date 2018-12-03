@@ -11,9 +11,14 @@ from threading import Thread
 import time
 from queue import Queue
 import Queues as bq
+from tkinter import filedialog as fd
+from os import path
+from TCP import startServer
 
 
 GLOBAL_CONST = 42
+fDir = path.dirname(__file__)
+netDir = fDir + '\\Backup'
 
 #===================================================================
 class OOP():
@@ -24,11 +29,17 @@ class OOP():
         #Create a Queue
         self.guiQueue = Queue()
 
+        #Start TCP/IP Server
+
+        svrT = Thread(target=startServer, daemon=True)
+        svrT.start()
+
         tt.createToolTip(self.win, 'Hello GUI.')
 
         # Add a title
         self.win.title("Python GUI")
         self.createWidgets()
+        self.defaultFileEntries()
 
     def createThread(self):
         self.runT = Thread(target=self.useQue)
@@ -46,6 +57,18 @@ class OOP():
 
         while True:
             print(self.guiQue.get())
+
+    def defaultFileEntries(self):
+        self.fileEntry.delete(0, tk.END)
+        self.fileEntry.insert(0, fDir)
+        if len(fDir) > self.entryLen:
+            self.fileEntry.config(width=len(fDir) + 3)
+            self.fileEntry.config(state='readonly')
+
+        self.netEntry.delete(0, tk.END)
+        self.netEntry.insert(0, netDir)
+        if len(netDir) > self.endryLen:
+            self.netwEntry.config(width=len(netDir) + 3)
 
     # Button callback
     def clickMe(self):
@@ -123,6 +146,8 @@ class OOP():
         self.name = tk.StringVar()
         nameEntered = ttk.Entry(self.monty, width=24, textvariable=self.name)
         nameEntered.grid(column=0, row=1, sticky='W')
+        nameEntered.delete(0, tk.END)
+        nameEntered.insert(0, '<default name>')
 
         # Adding a Button
         self.action = ttk.Button(self.monty, text="Click Me!", command=self.clickMe)
@@ -197,7 +222,18 @@ class OOP():
 
         # Add some space around each label
         for child in labelsFrame.winfo_children():
-            child.grid_configure(padx=6, pady=6)
+            child.grid_configure(padx=8)
+
+        mngFilesFrame = ttk.LabelFrame(tab2, text='Managa Files: ')
+        mngFilesFrame.grid(column=0, row=1, sticky='WE', padx=10, pady=5)
+
+        def getFileName():
+            print('hello from getFileName')
+            fDir = path.dirname(__file__)
+            fName = fd.askopenfilename(parent=self.win, initialdir=fDir)
+
+        lb = ttk.Button(mngFilesFrame, text='Browse to File...', command=getFileName)
+        lb.grid(column=0, row=0, sticky=tk.W)
 
         def copyFile():
             import shutil
@@ -208,12 +244,17 @@ class OOP():
                 shutil.copy(src, dst)
                 mBox.showinfo('Copy File to Network', 'Succes: File copied.')
             except FileNotFoundError as err:
-                mBox.showerror('Copy File to Network', '*** Failed to copy file! *** \n\n\')
+                mBox.showerror('Copy File to Network', '*** Failed to copy file! *** ')
             except Exception as ex:
-                mBox.showerror('Copy file to network', '*** Failed *** \n\n')
+                mBox.showerror('Copy file to network', '*** Failed *** ')
 
-        cb.ttk.Button(mngFilesFrame, text= 'Copy file to:', command = copyFile)
+
+        cb = ttk.Button(mngFilesFrame, text= 'Copy file to:  ', command = copyFile)
         cb.grid(column=0, row=1, sticky=tk.E)
+
+        for child in mngFilesFrame.winfo_children():
+            child.grid_configure(padx=6, pady=6)
+
 
         # Creating a Menu Bar
         menuBar = Menu(tab1)
@@ -248,16 +289,16 @@ class OOP():
         # It is not necessary to create a tk.StringVar()
         strData = tk.StringVar()
         strData = self.spin.get()
-        print("Hello " + strData)
 
         # Printing the Global works
-        print(GLOBAL_CONST)
 
         # call method
         self.usingGlobal()
 
+        tabControl.select(1)
+
         # Place cursor into name Entry
-        nameEntered.focus()
+        # nameEntered.focus()
 
         # Add a Tooltip to the Spinbox
         tt.createToolTip(self.spin, 'This is a Spin control.')
