@@ -4,6 +4,8 @@ from tkinter import scrolledtext
 from tkinter import Menu
 from tkinter import messagebox as mBox
 from tkinter import Spinbox
+import URL as url
+
 
 class ToolTip(object):
     def __init__(self, widget):
@@ -70,8 +72,16 @@ monty.grid(column=0, row=0)
 aLabel = ttk.Label(monty, text="A Labal")
 aLabel.grid(column=0, row=0)
 
-def clickMe():
-    action.configure(text='Hello ' + name.get() + ' ' + numberChosen.get())
+def clickMe(self):
+    self.action.configure(text='Hello ' + self.name.get())
+    print(self)
+    bq.writetToScrol(self)
+    sleep(2)
+    htmlData = url.gethtml()
+    print(htmlData)
+    self.scr.insert(tk.INSERT, htmlData)
+
+
 ttk.Label(monty, text="Enter a name:").grid(column=0, row=0, sticky='W')
 
 name = tk.StringVar()
