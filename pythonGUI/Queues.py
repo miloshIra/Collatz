@@ -9,4 +9,4 @@ def writeToScrol(inst):
         sock.send(b'Message from a que: ' + bytes(srt(idx).encode))
         recv = sock.recv(8192).decode()
         inst.guiQueue.put(recv)
-    inst.createThread(6)   
+    inst.createThread(6)
