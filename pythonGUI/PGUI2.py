@@ -8,7 +8,7 @@ from tkinter import Menu
 from tkinter import Spinbox
 import tooltip as tt
 import Queues as bq
-from TCP_Server import startServer
+from TCP import startServer
 import URL as url
 
 from threading import Thread
@@ -330,7 +330,7 @@ class OOP():
         menuBar.add_cascade(label="Help", menu=helpMenu)
 
         # Change the main windows icon
-        self.win.iconbitmap(r'C:\Users\milos.aritonski\Desktop\vitek.ico')
+        self.win.iconbitmap(r'C:\Users\Ira\Desktop\Radiation.ico')
 
         # Using tkinter Variable Classes
         strData = tk.StringVar()

@@ -1,13 +1,18 @@
 
-import psycopg2 as pd
+import psycopg2 as ps
+import GUIDB
 
-conn = pd.connect(**DB.dbconfig)
-cur = conn.cursor
+DB = 'GUIDB'
 
-try:
-    cursor.execute("CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(GUIDB))
-except pd.Error as err:
-    print("Failed to create DB:{}"".format(err))
+conn = ps.connect("dbname='GUIDB' user='postgres' password='post' host='localhost' port='5432'")
+cursor = conn.cursor()
+cursor.execute("CREATE TABLE Quotations (Quote_ID INT, Quoatation VARCHAR(250),
+                                        Books_Book_ID INT,
+                                        SERIAL (Quote_ID),
+                                        FOREGIN KEY (Books_Book_ID)
+                                        ON DELETE CASCADE")
+cursor.execute("SELECT * FROM BOOKS")
+print(cursor.fetchall())
 
 print(conn)
 conn.close
