@@ -2,40 +2,33 @@
 # imports
 #======================
 import tkinter as tk
-from tkinter import ttk
-from tkinter import scrolledtext
-from tkinter import Menu
-from tkinter import Spinbox
-
-import ToolTip as tt
-
-from threading import Thread
-from time import sleep
+from tkinter import ttk, scrolledtext, Menu, Spinbox, \
+                    filedialog as fd, messagebox as mBox
 from queue import Queue
-from tkinter import filedialog as fd
 from os import path
-from tkinter import messagebox as mBox
-
+import ToolTip as tt
 import psycopg2 as ps
 from Resources import I18N
-
-from datetime import datetime
-from pytz import all_timezones, timezone
+from Callbacks_Refactored import Callbacks
+from Logger import Logger, LogLevel
 
 # Module level GLOBALS
 GLOBAL_CONST = 42
 
 #===================================================================
 class OOP():
-    def __init__(self):
+    def __init__(self, language='en'):
         # Create instance
         self.win = tk.Tk()
 
-        self.i18n = I18N('en')
-        self.i18n = I18N('de')
+        self.i18n = I18N(language)
+#         self.i18n = I18N(language)
 
         # Add a title
         self.win.title(self.i18n.title)
+
+        # Callback methods now in different module
+        self.callBacks = Callbacks(self)
 
         # Disable resizing the window
         self.win.resizable(0,0)
@@ -46,126 +39,17 @@ class OOP():
         self.createWidgets()
 
         # populate Tab 2 Entries
-        self.defaultFileEntries()
+        self.callBacks.defaultFileEntries()
 
         # create MySQL instance
-        #self.mySQL = MySQL()
+        self.mySQL = MySQL()
 
-    def defaultFileEntries(self):
-        self.fileEntry.delete(0, tk.END)
-        self.fileEntry.insert(0, 'Z:\\')        # bogus path
-        self.fileEntry.config(state='readonly')
+        # create Logger instance
+        fullPath = path.realpath(__file__)
+        self.log = Logger(fullPath)
 
-        self.netwEntry.delete(0, tk.END)
-        self.netwEntry.insert(0, 'Z:\\Backup')  # bogus path
-
-    # Combobox callback
-    def _combo(self, val=0):
-        value = self.combo.get()
-        self.scr.insert(tk.INSERT, value + '\n')
-
-    # Spinbox callback
-    def _spin(self):
-        value = self.spin.get()
-        self.scr.insert(tk.INSERT, value + '\n')
-
-    # Checkbox callback
-    def checkCallback(self, *ignoredArgs):
-        # only enable one checkbutton
-        if self.chVarUn.get(): self.check3.configure(state='disabled')
-        else:             self.check3.configure(state='normal')
-        if self.chVarEn.get(): self.check2.configure(state='disabled')
-        else:             self.check2.configure(state='normal')
-
-    # Radiobutton callback function
-    def radCall(self):
-        radSel=self.radVar.get()
-        if   radSel == 0: self.widgetFrame.configure(text=self.i18n.WIDGET_LABEL + self.i18n.colorsIn[0])
-        elif radSel == 1: self.widgetFrame.configure(text=self.i18n.WIDGET_LABEL + self.i18n.colorsIn[1])
-        elif radSel == 2: self.widgetFrame.configure(text=self.i18n.WIDGET_LABEL + self.i18n.colorsIn[2])
-
-    # Exit GUI cleanly
-    def _quit(self):
-        self.win.quit()
-        self.win.destroy()
-        exit()
-
-    def methodInAThread(self, numOfLoops=10):
-        for idx in range(numOfLoops):
-            sleep(1)
-            self.scr.insert(tk.INSERT, str(idx) + '\n')
-        sleep(1)
-        print('methodInAThread():', self.runT.isAlive())
-
-    # Running methods in Threads
-    def createThread(self, num):
-        self.runT = Thread(target=self.methodInAThread, args=[num])
-        self.runT.setDaemon(True)
-        self.runT.start()
-        print(self.runT)
-        print('createThread():', self.runT.isAlive())
-
-        # textBoxes are the Consumers of Queue data
-        writeT = Thread(target=self.useQueues, daemon=True)
-        writeT.start()
-
-    # Create Queue instance
-    def useQueues(self):
-        # Now using a class member Queue
-        while True:
-            qItem = self.guiQueue.get()
-            print(qItem)
-            self.scr.insert(tk.INSERT, qItem + '\n')
-
-    # Button callback
-    def insertQuote(self):
-        title = self.bookTitle.get()
-        page = self.pageNumber.get()
-        quote = self.quote.get(1.0, tk.END)
-        print(title)
-        print(quote)
-        self.mySQL.insertBooks(title, page, quote)
-
-    # Button callback
-    def getQuote(self):
-        allBooks = self.mySQL.showBooks()
-        print(allBooks)
-        self.quote.insert(tk.INSERT, allBooks)
-
-    # Button callback
-    def modifyQuote(self):
-        raise NotImplementedError("This still needs to be implemented for the SQL command.")
-
-    # TZ Button callback
-    def allTimeZones(self):
-        for tz in all_timezones:
-            self.scr.insert(tk.INSERT, tz + '\n')
-
-    # TZ Local Button callback
-    def localZone(self):
-        from tzlocal import get_localzone
-        self.scr.insert(tk.INSERT, get_localzone())
-
-
-    # Format local US time with TimeZone info
-    def getDateTime(self):
-        fmtStrZone = "%Y-%m-%d %H:%M:%S %Z%z"
-        # Get Coordinated Universal Time
-        utc = datetime.now(timezone('UTC'))
-        print(utc.strftime(fmtStrZone))
-
-        # Convert UTC datetime object to Los Angeles TimeZone
-        la = utc.astimezone(timezone('America/Los_Angeles'))
-        print(la.strftime(fmtStrZone))
-
-        # Convert UTC datetime object to New York TimeZone
-        ny = utc.astimezone(timezone('America/New_York'))
-        print(ny.strftime(fmtStrZone))
-
-        # update GUI label with NY Time and Zone
-        self.lbl2.set(ny.strftime(fmtStrZone))
-
-
+        # create Log Level instance
+        self.level = LogLevel()
 
     #####################################################################################
     def createWidgets(self):
@@ -222,15 +106,15 @@ class OOP():
         self.pageNumber2.grid(column=1, row=3, sticky='W')
 
         # Adding a Button
-        self.action = ttk.Button(self.mySQL, text="Insert Quote", command=self.insertQuote)
+        self.action = ttk.Button(self.mySQL, text="Insert Quote", command=self.callBacks.insertQuote)
         self.action.grid(column=2, row=1)
 
         # Adding a Button
-        self.action1 = ttk.Button(self.mySQL, text="Get Quotes", command=self.getQuote)
+        self.action1 = ttk.Button(self.mySQL, text="Get Quotes", command=self.callBacks.getQuote)
         self.action1.grid(column=2, row=2)
 
         # Adding a Button
-        self.action2 = ttk.Button(self.mySQL, text="Mody Quote", command=self.modifyQuote)
+        self.action2 = ttk.Button(self.mySQL, text="Mody Quote", command=self.callBacks.modifyQuote)
         self.action2.grid(column=2, row=3)
 
         # Add some space around each widget
@@ -287,11 +171,11 @@ class OOP():
 
         # Creating all three Radiobutton widgets within one loop
         for col in range(3):
-            curRad = 'rad' + str(col)
-            curRad = tk.Radiobutton(self.widgetFrame, text=colors[col], variable=self.radVar, value=col, command=self.radCall)
-            curRad.grid(column=col, row=6, sticky=tk.W, columnspan=3)
+            self.curRad = 'rad' + str(col)
+            self.curRad = tk.Radiobutton(self.widgetFrame, text=colors[col], variable=self.radVar, value=col, command=self.callBacks.radCall)
+            self.curRad.grid(column=col, row=6, sticky=tk.W, columnspan=3)
             # And now adding tooltips
-            tt.createToolTip(curRad, 'This is a Radiobutton control.')
+            tt.createToolTip(self.curRad, 'This is a Radiobutton control.')
 
         # Create a container to hold labels
         labelsFrame = ttk.LabelFrame(self.widgetFrame, text=self.i18n.labelsFrame)
@@ -312,10 +196,10 @@ class OOP():
         self.combo['values'] = (1, 2, 4, 42, 100)
         self.combo.grid(column=1, row=7, sticky=tk.W)
         self.combo.current(0)
-        self.combo.bind('<<ComboboxSelected>>', self._combo)
+        self.combo.bind('<<ComboboxSelected>>', self.callBacks._combo)
 
         # Adding a Spinbox widget using a set of values
-        self.spin = Spinbox(self.widgetFrame, values=(1, 2, 4, 42, 100), width=5, bd=8, command=self._spin)
+        self.spin = Spinbox(self.widgetFrame, values=(1, 2, 4, 42, 100), width=5, bd=8, command=self.callBacks._spin)
         self.spin.grid(column=2, row=7, sticky='W,', padx=6, pady=1)
 
         # Using a scrolled Text control
@@ -324,21 +208,15 @@ class OOP():
         self.scr.grid(column=0, row=8, sticky='WE', columnspan=3)
 
         # Adding a TZ Button
-        self.allTZs = ttk.Button(self.widgetFrame,
-                                 text=self.i18n.timeZones,
-                                 command=self.allTimeZones)
+        self.allTZs = ttk.Button(self.widgetFrame, text=self.i18n.timeZones, command=self.callBacks.allTimeZones)
         self.allTZs.grid(column=0, row=9, sticky='WE')
 
         # Adding local TZ Button
-        self.localTZ = ttk.Button(self.widgetFrame,
-                                  text=self.i18n.localZone,
-                                  command=self.localZone)
+        self.localTZ = ttk.Button(self.widgetFrame, text=self.i18n.localZone, command=self.callBacks.localZone)
         self.localTZ.grid(column=1, row=9, sticky='WE')
 
         # Adding getTime TZ Button
-        self.dt = ttk.Button(self.widgetFrame,
-                             text=self.i18n.getTime,
-                             command=self.getDateTime)
+        self.dt = ttk.Button(self.widgetFrame, text=self.i18n.getTime, command=self.callBacks.getDateTime)
         self.dt.grid(column=2, row=9, sticky='WE')
 
 
@@ -403,7 +281,7 @@ class OOP():
         fileMenu = Menu(menuBar, tearoff=0)
         fileMenu.add_command(label=self.i18n.new)
         fileMenu.add_separator()
-        fileMenu.add_command(label=self.i18n.exit, command=self._quit)
+        fileMenu.add_command(label=self.i18n.exit, command=self.callBacks._quit)
         menuBar.add_cascade(label=self.i18n.file, menu=fileMenu)
 
         # Add another Menu to the Menu Bar and an item
@@ -412,7 +290,7 @@ class OOP():
         menuBar.add_cascade(label=self.i18n.help, menu=helpMenu)
 
         # Change the main windows icon
-        self.win.iconbitmap(r'C:\Users\milos.aritonski\Desktop\vitek.ico')
+        self.win.iconbitmap(r'C:\Python34\DLLs\pyc.ico')
 
         # Using tkinter Variable Classes
         strData = tk.StringVar()
@@ -433,8 +311,13 @@ class OOP():
         tt.createToolTip(self.action, 'This is a Button control.')
         tt.createToolTip(self.scr,    'This is a ScrolledText control.')
 
-#======================
-# Start GUI
-#======================
-oop = OOP()
-oop.win.mainloop()
+if __name__ == '__main__':
+    #======================
+    # Start GUI
+    #======================
+    oop = OOP()
+    print(oop.log)
+#     oop.log.setLoggingLevel(oop.level.DEBUG)
+    oop.log.setLoggingLevel(oop.level.MINIMUM)
+    oop.log.writeToLog('Test message')
+    oop.win.mainloop()
