@@ -2,6 +2,7 @@ import datetime
 import os
 import csv
 
+
 user = None
 
 def get_user():
